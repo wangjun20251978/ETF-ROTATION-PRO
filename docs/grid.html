@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ETF网格交易看板</title>
+<style>
+:root{--bg:#0d1117;--card:#161b22;--bd:#30363d;--t:#c9d1d9;--td:#8b949e;
+--g:#3fb950;--r:#f85149;--y:#d29922;--b:#58a6ff;--p:#bc8cff;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--t);padding:20px;}
+h1{font-size:22px;margin-bottom:4px;}
+.sub{color:var(--td);font-size:13px;margin-bottom:16px;}
+.mk{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:14px;line-height:1.7;}
+.mk.up{border-left:5px solid var(--y);}
+.mk.down{border-left:5px solid var(--r);}
+.mk.range{border-left:5px solid var(--g);}
+.mk.watch{border-left:5px solid var(--td);}
+.mktip{font-size:12px;color:var(--td);}
+.sum{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;}
+.sbox{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px 22px;text-align:center;min-width:130px;}
+.sbox .n{font-size:28px;font-weight:700;}
+.sbox .l{font-size:12px;color:var(--td);margin-top:2px;}
+.st{display:inline-block;padding:2px 10px;border-radius:12px;font-size:12px;white-space:nowrap;}
+.st.range{background:rgba(88,166,255,.15);border:1px solid var(--b);color:var(--b);}
+.st.stag{background:rgba(188,140,255,.15);border:1px solid var(--p);color:var(--p);}
+.st.trend{background:rgba(63,185,80,.12);border:1px solid var(--g);color:var(--g);}
+.st.watch{background:rgba(139,148,158,.12);border:1px solid var(--td);color:var(--td);}
+.opb{display:inline-block;padding:2px 10px;border-radius:6px;font-size:12px;font-weight:600;}
+.opb.grid{background:rgba(88,166,255,.15);color:var(--b);}
+.opb.no{background:rgba(248,81,73,.12);color:var(--r);}
+.opb.wait{background:rgba(139,148,158,.12);color:var(--td);}
+.zone{font-size:12px;color:var(--y);}
+.btsub{font-size:11px;color:var(--td);}
+.btwarn{font-size:11px;color:var(--r);font-weight:600;}
+.btbrk{font-size:11px;color:var(--g);font-weight:600;}
+.bline{background:rgba(88,166,255,.07);border:1px solid var(--bd);border-radius:8px;padding:8px 14px;font-size:13px;margin-bottom:12px;}
+.entry{padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;margin-bottom:12px;}
+.entry.eok{background:rgba(63,185,80,.12);border:1px solid var(--g);color:var(--g);}
+.entry.eno{background:rgba(210,153,34,.10);border:1px solid var(--y);color:var(--y);}
+table{width:100%;border-collapse:collapse;background:var(--card);border-radius:8px;overflow:hidden;font-size:13px;margin-bottom:24px;}
+th{background:#21262d;color:var(--td);padding:10px 6px;text-align:center;font-weight:600;border-bottom:2px solid var(--bd);white-space:nowrap;}
+td{padding:9px 6px;text-align:center;border-bottom:1px solid var(--bd);white-space:nowrap;}
+td.nm{font-weight:600;}
+tr:hover{background:rgba(88,166,255,.05);}
+h2{font-size:17px;margin:26px 0 12px;color:var(--b);}
+.gcard{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:18px 20px;margin-bottom:18px;}
+.ghead{font-size:16px;font-weight:700;margin-bottom:10px;}
+.ghead .code{color:var(--td);font-weight:400;font-size:13px;margin:0 6px;}
+.ghead .gp{font-size:13px;color:var(--td);font-weight:400;margin-left:10px;}
+.gmeta{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--td);margin-bottom:12px;}
+.gmeta b{color:var(--t);}
+.gmeta .stop b{color:var(--r);}
+.gmeta .brk b{color:var(--g);}
+table.gt{font-size:12px;margin-bottom:10px;}
+table.gt td,table.gt th{padding:5px 8px;}
+table.gt tr.cur{background:rgba(210,153,34,.14);}
+table.gt tr.cur td:first-child{color:var(--y);font-weight:700;}
+.gnote{font-size:12px;color:var(--td);line-height:1.7;}
+.empty{background:var(--card);border:2px solid var(--y);border-radius:12px;padding:24px;text-align:center;font-size:15px;color:var(--y);}
+.tip{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:14px 18px;margin:18px 0;font-size:13px;color:var(--td);line-height:1.9;}
+.tip b{color:var(--t);}
+.foot{color:var(--td);font-size:12px;margin-top:20px;text-align:center;}
+a{color:var(--b);text-decoration:none;}
+</style></head><body>
+<h1>🧮 ETF 网格交易看板</h1>
+<div class="sub">📅 2026-09-14 19:53 · 数据源: 离线快照 · <a href="index.html">← 返回三因子轮动看板</a></div>
+<div class="mk range"><b>🎚️ 大盘开关</b> 上证 3885.33 · ADX 17.8 · 20日动量 <span style="color:#3fb950">-2.44%</span> · 判定 <span class="st range">震荡市</span> → <b>网格总仓位 ≤ 100%</b><br><span class="mktip">网格黄金期: 仓位可拉满, 按下方卡片参数机械执行</span></div>
+<div class="sum">
+  <div class="sbox"><div class="n" style="color:var(--b)">17</div><div class="l">震荡市(网格)</div></div>
+  <div class="sbox"><div class="n" style="color:var(--p)">0</div><div class="l">高位滞涨(网格)</div></div>
+  <div class="sbox"><div class="n" style="color:var(--g)">5</div><div class="l">趋势市(禁网格)</div></div>
+  <div class="sbox"><div class="n" style="color:var(--td)">4</div><div class="l">观望</div></div>
+</div>
+<div class="tip"><b>使用规则:</b>
+① <b>网格第一前提</b>——只做「震荡市」和「高位滞涨」标的, 趋势市(ADX≥25)网格必亏, 坚决不碰;
+② <b>结构</b>: 底仓50%长线不动(吃趋势, 突破不卖飞) + 浮动仓正金字塔网格(越深的格买得越多, 摊低成本);
+③ <b>开仓过滤</b>: 只做120日低分位箱体, 且价格回到箱体下部才开仓(卡片有✅/⏳/⚠标记);
+④ <b>止损铁律</b>: 收盘跌破区间下沿5% = 箱体失效, 全部清仓(含底仓), 等下一个箱体再开;
+⑤ <b>突破处理</b>: 涨破区间上沿 = 浮动仓停网格, 底仓继续持有吃趋势;
+⑥ 回测口径: 250日滚动箱体(每20日重定区间), 看总收益/最大回撤/卡玛, 别只看一两个月。</div>
+<table>
+<tr><th>代码</th><th>名称</th><th>现价</th><th>5日收益</th><th>20日动量</th><th>行情状态</th><th>ADX</th><th>震荡分</th><th>滞涨分</th><th>网格区间</th><th>格数/步长</th><th>止损价</th><th>250日回测</th><th>操作</th><th>当前位置</th></tr>
+<tr><td>sh513100</td><td class='nm'>纳指ETF</td><td>2.191</td><td><span style="color:#3fb950">-0.02%</span></td><td><span style="color:#3fb950">-3.65%</span></td><td><span class="st range">震荡市</span></td><td>8.3</td><td>99.8</td><td>33</td><td>2.035~2.292</td><td>5格/2.53%</td><td>1.933</td><td><span style="color:#f85149">+30.81%</span><br><span class='btsub'>死拿+30.73%·回撤14.2%·套利55</span><br><span class='btbrk'>突破5次</span></td><td><span class="opb grid">网格</span></td><td><span class="zone">中部(持有)</span></td></tr>
+<tr><td>sz159920</td><td class='nm'>恒生ETF</td><td>1.462</td><td><span style="color:#3fb950">-0.02%</span></td><td><span style="color:#3fb950">-2.60%</span></td><td><span class="st range">震荡市</span></td><td>14.3</td><td>95.5</td><td>33</td><td>1.332~1.547</td><td>6格/2.69%</td><td>1.265</td><td><span style="color:#3fb950">-0.93%</span><br><span class='btsub'>死拿-6.04%·回撤16.6%·套利47</span><br><span class='btwarn'>止损1次</span><br><span class='btbrk'>突破1次</span></td><td><span class="opb grid">网格</span></td><td><span class="zone">中部(持有)</span></td></tr>
+<tr><td>sh513500</td><td class='nm'>标普500</td><td>2.656</td><td><span style="color:#3fb950">-0.01%</span></td><td><span style="color:#3fb950">-3.35%</span></td><td><span class="st range">震荡市</span></td><td>13.8</td><td>92.3</td><td>66</td><td>2.461~2.778</td><td>5格/2.58%</td><td>2.338</td><td><span style="color:#f85149">+21.07%</span><br><span class='btsub'>死拿+22.00%·回撤13.5%·套利54</span><br><span class='btwarn'>止损1次</span><br><span class='btbrk'>突破4次</span></td><td><span class="opb grid">网格</span></td><td><span class="zone">中部(持有)</span></td></tr>
+<tr><td>sh510050</td><td class='nm'>上证50</td><td>2.976</td><td><span style="color:#3fb950">-0.01%</span></td><td><span style="color:#3fb950">-2.49%</span></td><td><span class="st range">震荡市</span></td><td>8.2</td><td>92.3</td><td>33</td><td>2.916~3.125</td><td>5格/1.43%</td><td>2.770</td><td><span style="color:#f85149">+5.26%</span><br><span class='btsub'>死拿-3.60%·回撤8.7%·套利51</span><br><span class='btbrk'>突破1次</span></td><td><span class="opb grid">网格</span></td><td><span class="zone">下部(可买区)</span></td></tr>
+<tr><td>sz159928</td><td class='nm'>消费</td><td>0.657</td><td><span style="color:#3fb950">-0.04%</span></td><td><span style="color:#3fb950">-1.50%</span></td><td><span class="st range">震荡市</span></td><td>18.0</td><td>92.0</td><td>33</td><td>0.593~0.701</td><td>7格/2.60%</td><td>0.563</td><td><span style="color:#3fb950">-24.24%</span><br><span class='btsub'>死拿-23.34%·回撤32.9%·套利27</span><br><span class='btwarn'>止损2次</span><br><span class='btbrk'>突破1次</span></td><td><span class="opb grid">网格</span></td><td><span class="zone">中部(持有)</span></td></tr>
+<tr><td>sh512100</td><td class='nm'>中证1000</td><td>3.033</td><td><span style="color:#3fb950">-0.02%</span></td><td><span style="color:#3fb950">-5.95%</span></td><td><span class="st range">震荡市</span></td><td>16.1</td><td>91.0</td><td>33</td><td>2.880~3.235</td><td>5格/2.47%</td><td>2.736</td><td><span style="color:#f85149">+13.72%</span><br><span class='btsub'>死拿+4.08%·回撤18.6%·套利72</span><br><span class='btwarn'>止损1次</span><br><span class='btbrk'>突破3次</span></td><td><span class="opb grid">网格</span></td><td><span class="zone">中部(持有)</span></td></tr>
+<tr><td>sh515080</td><td class='nm'>中证红利</td><td>1.581</td><td><span style="color:#3fb950">-0.00%</span></td><td><span style="color:#f85149">+1.41%</span></td><td><span class="st range">震荡市</span></td><td>22.0</td><td>88.3</td><td>33</td><td>1.401~1.640</td><td>7格/2.44%</td><td>1.331</td><td><span style="color:#f85149">+4.07%</span><br><span class='btsub'>死拿+0.83%·回撤13.1%·套利48</span><br><span class='btwarn'>止损1次</span><br><span class='btbrk'>突破2次</span></td><td><span class="opb grid">网格</span></td><td><span class="zone">上部(可卖区)</span></td></tr>
+<tr><td>sh563300</td><td class='nm'>中证2000</td><td>1.419</td><td><span style="color:#3fb950">-0.02%</span></td><td><span style="color:#3fb950">-3.34%</span></td><td><span class="st range">震荡市</span></td><td>18.5</td><td>87.7</td><td>33</td><td>1.291~1.472</td><td>6格/2.34%</td><td>1.226</td><td><span style="color:#f85149">+14.55%</span><br><span class='btsub'>死拿+11.56%·回撤22.0%·套利85</span><br><span class='btwarn'>止损2次</span><br><span class='btbrk'>突破5次</span></td><td><span class="opb grid">网格</span></td><td><span class="zone">上部(可卖区)</span></td></tr>
+<tr><td>sh510300</td><td class='nm'>沪深300</td><td>4.552</td><td><span style="color:#3fb950">-0.02%</span></td><td><span style="color:#3fb950">-5.19%</span></td><td><span class="st range">震荡市</span></td><td>20.5</td><td>86.3</td><td>33</td><td>4.532~5.095</td><td>5格/2.48%</td><td>4.305</td><td><span style="color:#f85149">+7.19%</span><br><span class='btsub'>死拿+0.07%·回撤8.3%·套利54</span><br><span class='btbrk'>突破3次</span></td><td><span class="opb grid">网格</span></td><td><span class="zone">下部(可买区)</span></td></tr>
+<tr><td>sz159766</td><td class='nm'>旅游</td><td>0.555</td><td><span style="color:#3fb950">-0.04%</span></td><td><span style="color:#3fb950">-1.07%</span></td><td><span class="st range">震荡市</span></td><td>15.7</td><td>86.2</td><td>33</td><td>0.528~0.587</td><td>5格/2.23%</td><td>0.502</td><td><span style="color:#3fb950">-27.12%</span><br><span class='btsub'>死拿-21.83%·回撤39.5%·套利44</span><br><span class='btwarn'>止损3次</span><br><span class='btbrk'>突破3次</span></td><td><span class="opb grid">网格</span></td><td><span class="zone">中部(持有)</span></td></tr>
+<tr><td>sz159601</td><td class='nm'>MSCI中国A50</td><td>1.094</td><td><span style="color:#3fb950">-0.02%</span></td><td><span style="color:#3fb950">-5.45%</span></td><td><span class="st range">震荡市</span></td><td>16.5</td><td>80.9</td><td>33</td><td>1.089~1.200</td><td>5格/2.04%</td><td>1.034</td><td><span style="color:#f85149">+17.26%</span><br><span class='btsub'>死拿+10.28%·回撤8.5%·套利67</span><br><span class='btbrk'>突破4次</span></td><td><span class="opb grid">网格</span></td><td><span class="zone">下部(可买区)</span></td></tr>
+<tr><td>sh512660</td><td class='nm'>军工</td><td>1.149</td><td><span style="color:#3fb950">-0.00%</span></td><td><span style="color:#3fb950">-1.96%</span></td><td><span class="st range">震荡市</span></td><td>17.7</td><td>78.7</td><td>33</td><td>1.073~1.190</td><td>5格/2.18%</td><td>1.019</td><td><span style="color:#3fb950">-0.40%</span><br><span class='btsub'>死拿-4.41%·回撤33.3%·套利53</span><br><span class='btwarn'>止损3次</span><br><span class='btbrk'>突破2次</span></td><td><span class="opb grid">网格</span></td><td><span class="zone">中部(持有)</span></td></tr>
+<tr><td>sh512070</td><td class='nm'>证券</td><td>0.785</td><td><span style="color:#3fb950">-0.03%</span></td><td><span style="color:#3fb950">-0.13%</span></td><td><span class="st range">震荡市</span></td><td>18.0</td><td>77.7</td><td>33</td><td>0.768~0.831</td><td>5格/1.64%</td><td>0.730</td><td><span style="color:#3fb950">-9.81%</span><br><span class='btsub'>死拿-11.30%·回撤27.0%·套利40</span><br><span class='btwarn'>止损1次</span><br><span class='btbrk'>突破2次</span></td><td><span class="opb grid">网格</span></td><td><span class="zone">下部(可买区)</span></td></tr>
+<tr><td>sh515050</td><td class='nm'>电信</td><td>1.016</td><td><span style="color:#3fb950">-0.03%</span></td><td><span style="color:#3fb950">-9.04%</span></td><td><span class="st range">震荡市</span></td><td>15.6</td><td>76.5</td><td>33</td><td>0.926~1.119</td><td>8格/2.61%</td><td>0.880</td><td><span style="color:#3fb950">-36.48%</span><br><span class='btsub'>死拿-47.55%·回撤68.0%·套利76</span><br><span class='btwarn'>止损4次</span><br><span class='btbrk'>突破6次</span></td><td><span class="opb grid">网格</span></td><td><span class="zone">中部(持有)</span></td></tr>
+<tr><td>sh512690</td><td class='nm'>白酒</td><td>0.412</td><td><span style="color:#3fb950">-0.05%</span></td><td><span style="color:#3fb950">-4.19%</span></td><td><span class="st range">震荡市</span></td><td>16.4</td><td>72.5</td><td>33</td><td>0.378~0.455</td><td>8格/2.55%</td><td>0.359</td><td><span style="color:#3fb950">-35.95%</span><br><span class='btsub'>死拿-32.57%·回撤43.3%·套利27</span><br><span class='btwarn'>止损3次</span></td><td><span class="opb grid">网格</span></td><td><span class="zone">中部(持有)</span></td></tr>
+<tr><td>sh518880</td><td class='nm'>黄金ETF</td><td>8.875</td><td><span style="color:#3fb950">-0.02%</span></td><td><span style="color:#3fb950">-2.13%</span></td><td><span class="st range">震荡市</span></td><td>17.9</td><td>72.3</td><td>33</td><td>8.224~9.620</td><td>7格/2.42%</td><td>7.813</td><td><span style="color:#f85149">+1.02%</span><br><span class='btsub'>死拿+14.25%·回撤28.6%·套利58</span><br><span class='btwarn'>止损2次</span><br><span class='btbrk'>突破3次</span></td><td><span class="opb grid">网格</span></td><td><span class="zone">中部(持有)</span></td></tr>
+<tr><td>sh510500</td><td class='nm'>中证500</td><td>7.598</td><td><span style="color:#3fb950">-0.02%</span></td><td><span style="color:#3fb950">-7.31%</span></td><td><span class="st range">震荡市</span></td><td>22.2</td><td>68.6</td><td>33</td><td>7.464~8.223</td><td>5格/2.03%</td><td>7.091</td><td><span style="color:#f85149">+15.69%</span><br><span class='btsub'>死拿+9.48%·回撤15.7%·套利73</span><br><span class='btwarn'>止损1次</span><br><span class='btbrk'>突破4次</span></td><td><span class="opb grid">网格</span></td><td><span class="zone">下部(可买区)</span></td></tr>
+<tr><td>sz159901</td><td class='nm'>深证100</td><td>3.458</td><td><span style="color:#3fb950">-0.03%</span></td><td><span style="color:#3fb950">-9.17%</span></td><td><span class="st watch">观望</span></td><td>21.2</td><td>57.3</td><td>33</td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="opb wait">观望</span></td><td>—</td></tr>
+<tr><td>sz159915</td><td class='nm'>创业板</td><td>3.304</td><td><span style="color:#3fb950">-0.03%</span></td><td><span style="color:#3fb950">-12.03%</span></td><td><span class="st watch">观望</span></td><td>19.9</td><td>53.3</td><td>33</td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="opb wait">观望</span></td><td>—</td></tr>
+<tr><td>sh512800</td><td class='nm'>银行</td><td>0.856</td><td><span style="color:#f85149">+0.03%</span></td><td><span style="color:#f85149">+7.54%</span></td><td><span class="st trend">趋势上涨</span></td><td>36.0</td><td>49.3</td><td>33</td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="opb no">禁网格</span></td><td>—</td></tr>
+<tr><td>sh512010</td><td class='nm'>医药</td><td>0.372</td><td><span style="color:#3fb950">-0.02%</span></td><td><span style="color:#3fb950">-7.23%</span></td><td><span class="st trend">趋势下跌</span></td><td>25.9</td><td>44.8</td><td>33</td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="opb no">禁网格</span></td><td>—</td></tr>
+<tr><td>sh588000</td><td class='nm'>科创50</td><td>1.613</td><td><span style="color:#3fb950">-0.05%</span></td><td><span style="color:#3fb950">-14.57%</span></td><td><span class="st watch">观望</span></td><td>22.5</td><td>39.7</td><td>33</td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="opb wait">观望</span></td><td>—</td></tr>
+<tr><td>sh512480</td><td class='nm'>半导体</td><td>0.947</td><td><span style="color:#3fb950">-0.05%</span></td><td><span style="color:#3fb950">-16.34%</span></td><td><span class="st trend">趋势下跌</span></td><td>30.8</td><td>29.8</td><td>33</td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="opb no">禁网格</span></td><td>—</td></tr>
+<tr><td>sh513180</td><td class='nm'>恒生科技</td><td>0.545</td><td><span style="color:#3fb950">-0.05%</span></td><td><span style="color:#3fb950">-10.07%</span></td><td><span class="st watch">观望</span></td><td>24.7</td><td>25.3</td><td>33</td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="opb wait">观望</span></td><td>—</td></tr>
+<tr><td>sh516160</td><td class='nm'>新能源</td><td>2.324</td><td><span style="color:#3fb950">-0.02%</span></td><td><span style="color:#3fb950">-11.43%</span></td><td><span class="st trend">趋势下跌</span></td><td>36.0</td><td>21.7</td><td>33</td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="opb no">禁网格</span></td><td>—</td></tr>
+<tr><td>sz159981</td><td class='nm'>有色金属</td><td>1.778</td><td><span style="color:#f85149">+0.06%</span></td><td><span style="color:#f85149">+15.01%</span></td><td><span class="st trend">趋势上涨</span></td><td>33.9</td><td>10.0</td><td><b>67</b></td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="opb no">禁网格</span></td><td>—</td></tr>
+
+</table>
+<h2>📐 网格明细 (17 只可操作标的)</h2>
+
+<div class="gcard">
+  <div class="ghead">纳指ETF <span class="code">sh513100</span> <span class="st range">震荡市</span>
+    <span class="gp">现价 2.191 · 5日 <span style="color:#3fb950">-2.01%</span> · 中部(持有) · 120日分位 62%</span></div>
+  <div class="gmeta">
+    <span>区间 <b>2.035 ~ 2.292</b></span>
+    <span>分 <b>5</b> 格 · 每格约 <b>2.53%</b></span>
+    <span>结构 <b>底仓50% + 浮动50%金字塔</b></span>
+    <span class="stop">止损 <b>1.933</b>(破下沿-5%清仓)</span>
+    <span class="brk">突破 <b>2.315</b>(停浮动仓, 底仓续持)</span>
+  </div>
+  <div class="entry eno">⚠ 高位箱体(120日分位62%), 不建议新开网格</div>
+  <div class="bline">📊 250日回测(滚动箱体+金字塔+底仓): 网格 <b><span style="color:#f85149">+30.81%</span></b> (年化+30.81%, 最大回撤14.2%, 卡玛2.16) vs 死拿 <span style="color:#f85149">+30.73%</span> · 套利55次 · <b style="color:#3fb950">突破5次</b></div>
+  <table class="gt"><tr><th>格</th><th>买价</th><th></th><th>卖价</th><th>到买价买</th><th>到卖价卖</th></tr>
+  <tr><td>第1格</td><td>2.035</td><td>→</td><td>2.086</td><td>买3.0份</td><td>卖3.0份</td></tr>
+<tr><td>第2格</td><td>2.086</td><td>→</td><td>2.138</td><td>买2.5份</td><td>卖2.5份</td></tr>
+<tr><td>第3格</td><td>2.138</td><td>→</td><td>2.189</td><td>买2.0份</td><td>卖2.0份</td></tr>
+<tr class="cur"><td>第4格</td><td>2.189</td><td>→</td><td>2.241</td><td>买1.5份</td><td>卖1.5份</td></tr>
+<tr><td>第5格</td><td>2.241</td><td>→</td><td>2.292</td><td>买1.0份</td><td>卖1.0份</td></tr>
+</table>
+  <div class="gnote">当前处于 <b>中部(持有)</b>(第4格)。底仓50%长线不动; 浮动仓: 跌穿买价按份额买、涨破卖价按份额卖, 越深的格买得越多。</div>
+</div>
+
+<div class="gcard">
+  <div class="ghead">恒生ETF <span class="code">sz159920</span> <span class="st range">震荡市</span>
+    <span class="gp">现价 1.462 · 5日 <span style="color:#3fb950">-2.21%</span> · 中部(持有) · 120日分位 24%</span></div>
+  <div class="gmeta">
+    <span>区间 <b>1.332 ~ 1.547</b></span>
+    <span>分 <b>6</b> 格 · 每格约 <b>2.69%</b></span>
+    <span>结构 <b>底仓50% + 浮动50%金字塔</b></span>
+    <span class="stop">止损 <b>1.265</b>(破下沿-5%清仓)</span>
+    <span class="brk">突破 <b>1.562</b>(停浮动仓, 底仓续持)</span>
+  </div>
+  <div class="entry eno">⏳ 价格在箱体中上部, 等回调到下部再开</div>
+  <div class="bline">📊 250日回测(滚动箱体+金字塔+底仓): 网格 <b><span style="color:#3fb950">-0.93%</span></b> (年化-0.93%, 最大回撤16.6%, 卡玛-0.06) vs 死拿 <span style="color:#3fb950">-6.04%</span> · 套利47次 · <b style="color:#f85149">止损1次</b>/<b style="color:#3fb950">突破1次</b></div>
+  <table class="gt"><tr><th>格</th><th>买价</th><th></th><th>卖价</th><th>到买价买</th><th>到卖价卖</th></tr>
+  <tr><td>第1格</td><td>1.332</td><td>→</td><td>1.368</td><td>买3.5份</td><td>卖3.5份</td></tr>
+<tr><td>第2格</td><td>1.368</td><td>→</td><td>1.404</td><td>买3.0份</td><td>卖3.0份</td></tr>
+<tr><td>第3格</td><td>1.404</td><td>→</td><td>1.440</td><td>买2.5份</td><td>卖2.5份</td></tr>
+<tr class="cur"><td>第4格</td><td>1.440</td><td>→</td><td>1.475</td><td>买2.0份</td><td>卖2.0份</td></tr>
+<tr><td>第5格</td><td>1.475</td><td>→</td><td>1.511</td><td>买1.5份</td><td>卖1.5份</td></tr>
+<tr><td>第6格</td><td>1.511</td><td>→</td><td>1.547</td><td>买1.0份</td><td>卖1.0份</td></tr>
+</table>
+  <div class="gnote">当前处于 <b>中部(持有)</b>(第4格)。底仓50%长线不动; 浮动仓: 跌穿买价按份额买、涨破卖价按份额卖, 越深的格买得越多。</div>
+</div>
+
+<div class="gcard">
+  <div class="ghead">标普500 <span class="code">sh513500</span> <span class="st range">震荡市</span>
+    <span class="gp">现价 2.656 · 5日 <span style="color:#3fb950">-1.34%</span> · 中部(持有) · 120日分位 78%</span></div>
+  <div class="gmeta">
+    <span>区间 <b>2.461 ~ 2.778</b></span>
+    <span>分 <b>5</b> 格 · 每格约 <b>2.58%</b></span>
+    <span>结构 <b>底仓50% + 浮动50%金字塔</b></span>
+    <span class="stop">止损 <b>2.338</b>(破下沿-5%清仓)</span>
+    <span class="brk">突破 <b>2.806</b>(停浮动仓, 底仓续持)</span>
+  </div>
+  <div class="entry eno">⚠ 高位箱体(120日分位78%), 不建议新开网格</div>
+  <div class="bline">📊 250日回测(滚动箱体+金字塔+底仓): 网格 <b><span style="color:#f85149">+21.07%</span></b> (年化+21.07%, 最大回撤13.5%, 卡玛1.56) vs 死拿 <span style="color:#f85149">+22.00%</span> · 套利54次 · <b style="color:#f85149">止损1次</b>/<b style="color:#3fb950">突破4次</b></div>
+  <table class="gt"><tr><th>格</th><th>买价</th><th></th><th>卖价</th><th>到买价买</th><th>到卖价卖</th></tr>
+  <tr><td>第1格</td><td>2.461</td><td>→</td><td>2.524</td><td>买3.0份</td><td>卖3.0份</td></tr>
+<tr><td>第2格</td><td>2.524</td><td>→</td><td>2.588</td><td>买2.5份</td><td>卖2.5份</td></tr>
+<tr><td>第3格</td><td>2.588</td><td>→</td><td>2.651</td><td>买2.0份</td><td>卖2.0份</td></tr>
+<tr class="cur"><td>第4格</td><td>2.651</td><td>→</td><td>2.715</td><td>买1.5份</td><td>卖1.5份</td></tr>
+<tr><td>第5格</td><td>2.715</td><td>→</td><td>2.778</td><td>买1.0份</td><td>卖1.0份</td></tr>
+</table>
+  <div class="gnote">当前处于 <b>中部(持有)</b>(第4格)。底仓50%长线不动; 浮动仓: 跌穿买价按份额买、涨破卖价按份额卖, 越深的格买得越多。</div>
+</div>
+
+<div class="gcard">
+  <div class="ghead">上证50 <span class="code">sh510050</span> <span class="st range">震荡市</span>
+    <span class="gp">现价 2.976 · 5日 <span style="color:#3fb950">-1.39%</span> · 下部(可买区) · 120日分位 18%</span></div>
+  <div class="gmeta">
+    <span>区间 <b>2.916 ~ 3.125</b></span>
+    <span>分 <b>5</b> 格 · 每格约 <b>1.43%</b></span>
+    <span>结构 <b>底仓50% + 浮动50%金字塔</b></span>
+    <span class="stop">止损 <b>2.770</b>(破下沿-5%清仓)</span>
+    <span class="brk">突破 <b>3.156</b>(停浮动仓, 底仓续持)</span>
+  </div>
+  <div class="entry eok">✅ 低位箱体+价格在下部, 可开仓</div>
+  <div class="bline">📊 250日回测(滚动箱体+金字塔+底仓): 网格 <b><span style="color:#f85149">+5.26%</span></b> (年化+5.26%, 最大回撤8.7%, 卡玛0.60) vs 死拿 <span style="color:#3fb950">-3.60%</span> · 套利51次 · <b style="color:#3fb950">突破1次</b></div>
+  <table class="gt"><tr><th>格</th><th>买价</th><th></th><th>卖价</th><th>到买价买</th><th>到卖价卖</th></tr>
+  <tr><td>第1格</td><td>2.916</td><td>→</td><td>2.958</td><td>买3.0份</td><td>卖3.0份</td></tr>
+<tr class="cur"><td>第2格</td><td>2.958</td><td>→</td><td>3.000</td><td>买2.5份</td><td>卖2.5份</td></tr>
+<tr><td>第3格</td><td>3.000</td><td>→</td><td>3.041</td><td>买2.0份</td><td>卖2.0份</td></tr>
+<tr><td>第4格</td><td>3.041</td><td>→</td><td>3.083</td><td>买1.5份</td><td>卖1.5份</td></tr>
+<tr><td>第5格</td><td>3.083</td><td>→</td><td>3.125</td><td>买1.0份</td><td>卖1.0份</td></tr>
+</table>
+  <div class="gnote">当前处于 <b>下部(可买区)</b>(第2格)。底仓50%长线不动; 浮动仓: 跌穿买价按份额买、涨破卖价按份额卖, 越深的格买得越多。</div>
+</div>
+
+<div class="gcard">
+  <div class="ghead">消费 <span class="code">sz159928</span> <span class="st range">震荡市</span>
+    <span class="gp">现价 0.657 · 5日 <span style="color:#3fb950">-3.81%</span> · 中部(持有) · 120日分位 25%</span></div>
+  <div class="gmeta">
+    <span>区间 <b>0.593 ~ 0.701</b></span>
+    <span>分 <b>7</b> 格 · 每格约 <b>2.60%</b></span>
+    <span>结构 <b>底仓50% + 浮动50%金字塔</b></span>
+    <span class="stop">止损 <b>0.563</b>(破下沿-5%清仓)</span>
+    <span class="brk">突破 <b>0.708</b>(停浮动仓, 底仓续持)</span>
+  </div>
+  <div class="entry eno">⏳ 价格在箱体中上部, 等回调到下部再开</div>
+  <div class="bline">📊 250日回测(滚动箱体+金字塔+底仓): 网格 <b><span style="color:#3fb950">-24.24%</span></b> (年化-24.24%, 最大回撤32.9%, 卡玛-0.74) vs 死拿 <span style="color:#3fb950">-23.34%</span> · 套利27次 · <b style="color:#f85149">止损2次</b>/<b style="color:#3fb950">突破1次</b></div>
+  <table class="gt"><tr><th>格</th><th>买价</th><th></th><th>卖价</th><th>到买价买</th><th>到卖价卖</th></tr>
+  <tr><td>第1格</td><td>0.593</td><td>→</td><td>0.608</td><td>买4.0份</td><td>卖4.0份</td></tr>
+<tr><td>第2格</td><td>0.608</td><td>→</td><td>0.624</td><td>买3.5份</td><td>卖3.5份</td></tr>
+<tr><td>第3格</td><td>0.624</td><td>→</td><td>0.639</td><td>买3.0份</td><td>卖3.0份</td></tr>
+<tr><td>第4格</td><td>0.639</td><td>→</td><td>0.655</td><td>买2.5份</td><td>卖2.5份</td></tr>
+<tr class="cur"><td>第5格</td><td>0.655</td><td>→</td><td>0.670</td><td>买2.0份</td><td>卖2.0份</td></tr>
+<tr><td>第6格</td><td>0.670</td><td>→</td><td>0.686</td><td>买1.5份</td><td>卖1.5份</td></tr>
+<tr><td>第7格</td><td>0.686</td><td>→</td><td>0.701</td><td>买1.0份</td><td>卖1.0份</td></tr>
+</table>
+  <div class="gnote">当前处于 <b>中部(持有)</b>(第5格)。底仓50%长线不动; 浮动仓: 跌穿买价按份额买、涨破卖价按份额卖, 越深的格买得越多。</div>
+</div>
+
+<div class="gcard">
+  <div class="ghead">中证1000 <span class="code">sh512100</span> <span class="st range">震荡市</span>
+    <span class="gp">现价 3.033 · 5日 <span style="color:#3fb950">-2.07%</span> · 中部(持有) · 120日分位 13%</span></div>
+  <div class="gmeta">
+    <span>区间 <b>2.880 ~ 3.235</b></span>
+    <span>分 <b>5</b> 格 · 每格约 <b>2.47%</b></span>
+    <span>结构 <b>底仓50% + 浮动50%金字塔</b></span>
+    <span class="stop">止损 <b>2.736</b>(破下沿-5%清仓)</span>
+    <span class="brk">突破 <b>3.267</b>(停浮动仓, 底仓续持)</span>
+  </div>
+  <div class="entry eok">✅ 低位箱体+价格在下部, 可开仓</div>
+  <div class="bline">📊 250日回测(滚动箱体+金字塔+底仓): 网格 <b><span style="color:#f85149">+13.72%</span></b> (年化+13.72%, 最大回撤18.6%, 卡玛0.74) vs 死拿 <span style="color:#f85149">+4.08%</span> · 套利72次 · <b style="color:#f85149">止损1次</b>/<b style="color:#3fb950">突破3次</b></div>
+  <table class="gt"><tr><th>格</th><th>买价</th><th></th><th>卖价</th><th>到买价买</th><th>到卖价卖</th></tr>
+  <tr><td>第1格</td><td>2.880</td><td>→</td><td>2.951</td><td>买3.0份</td><td>卖3.0份</td></tr>
+<tr><td>第2格</td><td>2.951</td><td>→</td><td>3.022</td><td>买2.5份</td><td>卖2.5份</td></tr>
+<tr class="cur"><td>第3格</td><td>3.022</td><td>→</td><td>3.093</td><td>买2.0份</td><td>卖2.0份</td></tr>
+<tr><td>第4格</td><td>3.093</td><td>→</td><td>3.164</td><td>买1.5份</td><td>卖1.5份</td></tr>
+<tr><td>第5格</td><td>3.164</td><td>→</td><td>3.235</td><td>买1.0份</td><td>卖1.0份</td></tr>
+</table>
+  <div class="gnote">当前处于 <b>中部(持有)</b>(第3格)。底仓50%长线不动; 浮动仓: 跌穿买价按份额买、涨破卖价按份额卖, 越深的格买得越多。</div>
+</div>
+
+<div class="gcard">
+  <div class="ghead">中证红利 <span class="code">sh515080</span> <span class="st range">震荡市</span>
+    <span class="gp">现价 1.581 · 5日 <span style="color:#3fb950">-0.13%</span> · 上部(可卖区) · 120日分位 49%</span></div>
+  <div class="gmeta">
+    <span>区间 <b>1.401 ~ 1.640</b></span>
+    <span>分 <b>7</b> 格 · 每格约 <b>2.44%</b></span>
+    <span>结构 <b>底仓50% + 浮动50%金字塔</b></span>
+    <span class="stop">止损 <b>1.331</b>(破下沿-5%清仓)</span>
+    <span class="brk">突破 <b>1.656</b>(停浮动仓, 底仓续持)</span>
+  </div>
+  <div class="entry eno">⏳ 价格在箱体中上部, 等回调到下部再开</div>
+  <div class="bline">📊 250日回测(滚动箱体+金字塔+底仓): 网格 <b><span style="color:#f85149">+4.07%</span></b> (年化+4.07%, 最大回撤13.1%, 卡玛0.31) vs 死拿 <span style="color:#f85149">+0.83%</span> · 套利48次 · <b style="color:#f85149">止损1次</b>/<b style="color:#3fb950">突破2次</b></div>
+  <table class="gt"><tr><th>格</th><th>买价</th><th></th><th>卖价</th><th>到买价买</th><th>到卖价卖</th></tr>
+  <tr><td>第1格</td><td>1.401</td><td>→</td><td>1.435</td><td>买4.0份</td><td>卖4.0份</td></tr>
+<tr><td>第2格</td><td>1.435</td><td>→</td><td>1.469</td><td>买3.5份</td><td>卖3.5份</td></tr>
+<tr><td>第3格</td><td>1.469</td><td>→</td><td>1.503</td><td>买3.0份</td><td>卖3.0份</td></tr>
+<tr><td>第4格</td><td>1.503</td><td>→</td><td>1.538</td><td>买2.5份</td><td>卖2.5份</td></tr>
+<tr><td>第5格</td><td>1.538</td><td>→</td><td>1.572</td><td>买2.0份</td><td>卖2.0份</td></tr>
+<tr class="cur"><td>第6格</td><td>1.572</td><td>→</td><td>1.606</td><td>买1.5份</td><td>卖1.5份</td></tr>
+<tr><td>第7格</td><td>1.606</td><td>→</td><td>1.640</td><td>买1.0份</td><td>卖1.0份</td></tr>
+</table>
+  <div class="gnote">当前处于 <b>上部(可卖区)</b>(第6格)。底仓50%长线不动; 浮动仓: 跌穿买价按份额买、涨破卖价按份额卖, 越深的格买得越多。</div>
+</div>
+
+<div class="gcard">
+  <div class="ghead">中证2000 <span class="code">sh563300</span> <span class="st range">震荡市</span>
+    <span class="gp">现价 1.419 · 5日 <span style="color:#3fb950">-2.21%</span> · 上部(可卖区) · 120日分位 28%</span></div>
+  <div class="gmeta">
+    <span>区间 <b>1.291 ~ 1.472</b></span>
+    <span>分 <b>6</b> 格 · 每格约 <b>2.34%</b></span>
+    <span>结构 <b>底仓50% + 浮动50%金字塔</b></span>
+    <span class="stop">止损 <b>1.226</b>(破下沿-5%清仓)</span>
+    <span class="brk">突破 <b>1.487</b>(停浮动仓, 底仓续持)</span>
+  </div>
+  <div class="entry eno">⏳ 价格在箱体中上部, 等回调到下部再开</div>
+  <div class="bline">📊 250日回测(滚动箱体+金字塔+底仓): 网格 <b><span style="color:#f85149">+14.55%</span></b> (年化+14.55%, 最大回撤22.0%, 卡玛0.66) vs 死拿 <span style="color:#f85149">+11.56%</span> · 套利85次 · <b style="color:#f85149">止损2次</b>/<b style="color:#3fb950">突破5次</b></div>
+  <table class="gt"><tr><th>格</th><th>买价</th><th></th><th>卖价</th><th>到买价买</th><th>到卖价卖</th></tr>
+  <tr><td>第1格</td><td>1.291</td><td>→</td><td>1.321</td><td>买3.5份</td><td>卖3.5份</td></tr>
+<tr><td>第2格</td><td>1.321</td><td>→</td><td>1.351</td><td>买3.0份</td><td>卖3.0份</td></tr>
+<tr><td>第3格</td><td>1.351</td><td>→</td><td>1.381</td><td>买2.5份</td><td>卖2.5份</td></tr>
+<tr><td>第4格</td><td>1.381</td><td>→</td><td>1.412</td><td>买2.0份</td><td>卖2.0份</td></tr>
+<tr class="cur"><td>第5格</td><td>1.412</td><td>→</td><td>1.442</td><td>买1.5份</td><td>卖1.5份</td></tr>
+<tr><td>第6格</td><td>1.442</td><td>→</td><td>1.472</td><td>买1.0份</td><td>卖1.0份</td></tr>
+</table>
+  <div class="gnote">当前处于 <b>上部(可卖区)</b>(第5格)。底仓50%长线不动; 浮动仓: 跌穿买价按份额买、涨破卖价按份额卖, 越深的格买得越多。</div>
+</div>
+
+<div class="gcard">
+  <div class="ghead">沪深300 <span class="code">sh510300</span> <span class="st range">震荡市</span>
+    <span class="gp">现价 4.552 · 5日 <span style="color:#3fb950">-1.77%</span> · 下部(可买区) · 120日分位 9%</span></div>
+  <div class="gmeta">
+    <span>区间 <b>4.532 ~ 5.095</b></span>
+    <span>分 <b>5</b> 格 · 每格约 <b>2.48%</b></span>
+    <span>结构 <b>底仓50% + 浮动50%金字塔</b></span>
+    <span class="stop">止损 <b>4.305</b>(破下沿-5%清仓)</span>
+    <span class="brk">突破 <b>5.146</b>(停浮动仓, 底仓续持)</span>
+  </div>
+  <div class="entry eok">✅ 低位箱体+价格在下部, 可开仓</div>
+  <div class="bline">📊 250日回测(滚动箱体+金字塔+底仓): 网格 <b><span style="color:#f85149">+7.19%</span></b> (年化+7.19%, 最大回撤8.3%, 卡玛0.87) vs 死拿 <span style="color:#f85149">+0.07%</span> · 套利54次 · <b style="color:#3fb950">突破3次</b></div>
+  <table class="gt"><tr><th>格</th><th>买价</th><th></th><th>卖价</th><th>到买价买</th><th>到卖价卖</th></tr>
+  <tr class="cur"><td>第1格</td><td>4.532</td><td>→</td><td>4.645</td><td>买3.0份</td><td>卖3.0份</td></tr>
+<tr><td>第2格</td><td>4.645</td><td>→</td><td>4.757</td><td>买2.5份</td><td>卖2.5份</td></tr>
+<tr><td>第3格</td><td>4.757</td><td>→</td><td>4.870</td><td>买2.0份</td><td>卖2.0份</td></tr>
+<tr><td>第4格</td><td>4.870</td><td>→</td><td>4.982</td><td>买1.5份</td><td>卖1.5份</td></tr>
+<tr><td>第5格</td><td>4.982</td><td>→</td><td>5.095</td><td>买1.0份</td><td>卖1.0份</td></tr>
+</table>
+  <div class="gnote">当前处于 <b>下部(可买区)</b>(第1格)。底仓50%长线不动; 浮动仓: 跌穿买价按份额买、涨破卖价按份额卖, 越深的格买得越多。</div>
+</div>
+
+<div class="gcard">
+  <div class="ghead">旅游 <span class="code">sz159766</span> <span class="st range">震荡市</span>
+    <span class="gp">现价 0.555 · 5日 <span style="color:#3fb950">-4.48%</span> · 中部(持有) · 120日分位 20%</span></div>
+  <div class="gmeta">
+    <span>区间 <b>0.528 ~ 0.587</b></span>
+    <span>分 <b>5</b> 格 · 每格约 <b>2.23%</b></span>
+    <span>结构 <b>底仓50% + 浮动50%金字塔</b></span>
+    <span class="stop">止损 <b>0.502</b>(破下沿-5%清仓)</span>
+    <span class="brk">突破 <b>0.593</b>(停浮动仓, 底仓续持)</span>
+  </div>
+  <div class="entry eok">✅ 低位箱体+价格在下部, 可开仓</div>
+  <div class="bline">📊 250日回测(滚动箱体+金字塔+底仓): 网格 <b><span style="color:#3fb950">-27.12%</span></b> (年化-27.12%, 最大回撤39.5%, 卡玛-0.69) vs 死拿 <span style="color:#3fb950">-21.83%</span> · 套利44次 · <b style="color:#f85149">止损3次</b>/<b style="color:#3fb950">突破3次</b></div>
+  <table class="gt"><tr><th>格</th><th>买价</th><th></th><th>卖价</th><th>到买价买</th><th>到卖价卖</th></tr>
+  <tr><td>第1格</td><td>0.528</td><td>→</td><td>0.540</td><td>买3.0份</td><td>卖3.0份</td></tr>
+<tr><td>第2格</td><td>0.540</td><td>→</td><td>0.552</td><td>买2.5份</td><td>卖2.5份</td></tr>
+<tr class="cur"><td>第3格</td><td>0.552</td><td>→</td><td>0.563</td><td>买2.0份</td><td>卖2.0份</td></tr>
+<tr><td>第4格</td><td>0.563</td><td>→</td><td>0.575</td><td>买1.5份</td><td>卖1.5份</td></tr>
+<tr><td>第5格</td><td>0.575</td><td>→</td><td>0.587</td><td>买1.0份</td><td>卖1.0份</td></tr>
+</table>
+  <div class="gnote">当前处于 <b>中部(持有)</b>(第3格)。底仓50%长线不动; 浮动仓: 跌穿买价按份额买、涨破卖价按份额卖, 越深的格买得越多。</div>
+</div>
+
+<div class="gcard">
+  <div class="ghead">MSCI中国A50 <span class="code">sz159601</span> <span class="st range">震荡市</span>
+    <span class="gp">现价 1.094 · 5日 <span style="color:#3fb950">-2.23%</span> · 下部(可买区) · 120日分位 14%</span></div>
+  <div class="gmeta">
+    <span>区间 <b>1.089 ~ 1.200</b></span>
+    <span>分 <b>5</b> 格 · 每格约 <b>2.04%</b></span>
+    <span>结构 <b>底仓50% + 浮动50%金字塔</b></span>
+    <span class="stop">止损 <b>1.034</b>(破下沿-5%清仓)</span>
+    <span class="brk">突破 <b>1.212</b>(停浮动仓, 底仓续持)</span>
+  </div>
+  <div class="entry eok">✅ 低位箱体+价格在下部, 可开仓</div>
+  <div class="bline">📊 250日回测(滚动箱体+金字塔+底仓): 网格 <b><span style="color:#f85149">+17.26%</span></b> (年化+17.26%, 最大回撤8.5%, 卡玛2.04) vs 死拿 <span style="color:#f85149">+10.28%</span> · 套利67次 · <b style="color:#3fb950">突破4次</b></div>
+  <table class="gt"><tr><th>格</th><th>买价</th><th></th><th>卖价</th><th>到买价买</th><th>到卖价卖</th></tr>
+  <tr class="cur"><td>第1格</td><td>1.089</td><td>→</td><td>1.111</td><td>买3.0份</td><td>卖3.0份</td></tr>
+<tr><td>第2格</td><td>1.111</td><td>→</td><td>1.133</td><td>买2.5份</td><td>卖2.5份</td></tr>
+<tr><td>第3格</td><td>1.133</td><td>→</td><td>1.156</td><td>买2.0份</td><td>卖2.0份</td></tr>
+<tr><td>第4格</td><td>1.156</td><td>→</td><td>1.178</td><td>买1.5份</td><td>卖1.5份</td></tr>
+<tr><td>第5格</td><td>1.178</td><td>→</td><td>1.200</td><td>买1.0份</td><td>卖1.0份</td></tr>
+</table>
+  <div class="gnote">当前处于 <b>下部(可买区)</b>(第1格)。底仓50%长线不动; 浮动仓: 跌穿买价按份额买、涨破卖价按份额卖, 越深的格买得越多。</div>
+</div>
+
+<div class="gcard">
+  <div class="ghead">军工 <span class="code">sh512660</span> <span class="st range">震荡市</span>
+    <span class="gp">现价 1.149 · 5日 <span style="color:#3fb950">-0.17%</span> · 中部(持有) · 120日分位 28%</span></div>
+  <div class="gmeta">
+    <span>区间 <b>1.073 ~ 1.190</b></span>
+    <span>分 <b>5</b> 格 · 每格约 <b>2.18%</b></span>
+    <span>结构 <b>底仓50% + 浮动50%金字塔</b></span>
+    <span class="stop">止损 <b>1.019</b>(破下沿-5%清仓)</span>
+    <span class="brk">突破 <b>1.202</b>(停浮动仓, 底仓续持)</span>
+  </div>
+  <div class="entry eno">⏳ 价格在箱体中上部, 等回调到下部再开</div>
+  <div class="bline">📊 250日回测(滚动箱体+金字塔+底仓): 网格 <b><span style="color:#3fb950">-0.40%</span></b> (年化-0.40%, 最大回撤33.3%, 卡玛-0.01) vs 死拿 <span style="color:#3fb950">-4.41%</span> · 套利53次 · <b style="color:#f85149">止损3次</b>/<b style="color:#3fb950">突破2次</b></div>
+  <table class="gt"><tr><th>格</th><th>买价</th><th></th><th>卖价</th><th>到买价买</th><th>到卖价卖</th></tr>
+  <tr><td>第1格</td><td>1.073</td><td>→</td><td>1.096</td><td>买3.0份</td><td>卖3.0份</td></tr>
+<tr><td>第2格</td><td>1.096</td><td>→</td><td>1.120</td><td>买2.5份</td><td>卖2.5份</td></tr>
+<tr><td>第3格</td><td>1.120</td><td>→</td><td>1.143</td><td>买2.0份</td><td>卖2.0份</td></tr>
+<tr class="cur"><td>第4格</td><td>1.143</td><td>→</td><td>1.167</td><td>买1.5份</td><td>卖1.5份</td></tr>
+<tr><td>第5格</td><td>1.167</td><td>→</td><td>1.190</td><td>买1.0份</td><td>卖1.0份</td></tr>
+</table>
+  <div class="gnote">当前处于 <b>中部(持有)</b>(第4格)。底仓50%长线不动; 浮动仓: 跌穿买价按份额买、涨破卖价按份额卖, 越深的格买得越多。</div>
+</div>
+
+<div class="gcard">
+  <div class="ghead">证券 <span class="code">sh512070</span> <span class="st range">震荡市</span>
+    <span class="gp">现价 0.785 · 5日 <span style="color:#3fb950">-2.73%</span> · 下部(可买区) · 120日分位 33%</span></div>
+  <div class="gmeta">
+    <span>区间 <b>0.768 ~ 0.831</b></span>
+    <span>分 <b>5</b> 格 · 每格约 <b>1.64%</b></span>
+    <span>结构 <b>底仓50% + 浮动50%金字塔</b></span>
+    <span class="stop">止损 <b>0.730</b>(破下沿-5%清仓)</span>
+    <span class="brk">突破 <b>0.839</b>(停浮动仓, 底仓续持)</span>
+  </div>
+  <div class="entry eok">✅ 低位箱体+价格在下部, 可开仓</div>
+  <div class="bline">📊 250日回测(滚动箱体+金字塔+底仓): 网格 <b><span style="color:#3fb950">-9.81%</span></b> (年化-9.81%, 最大回撤27.0%, 卡玛-0.36) vs 死拿 <span style="color:#3fb950">-11.30%</span> · 套利40次 · <b style="color:#f85149">止损1次</b>/<b style="color:#3fb950">突破2次</b></div>
+  <table class="gt"><tr><th>格</th><th>买价</th><th></th><th>卖价</th><th>到买价买</th><th>到卖价卖</th></tr>
+  <tr><td>第1格</td><td>0.768</td><td>→</td><td>0.781</td><td>买3.0份</td><td>卖3.0份</td></tr>
+<tr class="cur"><td>第2格</td><td>0.781</td><td>→</td><td>0.793</td><td>买2.5份</td><td>卖2.5份</td></tr>
+<tr><td>第3格</td><td>0.793</td><td>→</td><td>0.806</td><td>买2.0份</td><td>卖2.0份</td></tr>
+<tr><td>第4格</td><td>0.806</td><td>→</td><td>0.818</td><td>买1.5份</td><td>卖1.5份</td></tr>
+<tr><td>第5格</td><td>0.818</td><td>→</td><td>0.831</td><td>买1.0份</td><td>卖1.0份</td></tr>
+</table>
+  <div class="gnote">当前处于 <b>下部(可买区)</b>(第2格)。底仓50%长线不动; 浮动仓: 跌穿买价按份额买、涨破卖价按份额卖, 越深的格买得越多。</div>
+</div>
+
+<div class="gcard">
+  <div class="ghead">电信 <span class="code">sh515050</span> <span class="st range">震荡市</span>
+    <span class="gp">现价 1.016 · 5日 <span style="color:#3fb950">-3.15%</span> · 中部(持有) · 120日分位 13%</span></div>
+  <div class="gmeta">
+    <span>区间 <b>0.926 ~ 1.119</b></span>
+    <span>分 <b>8</b> 格 · 每格约 <b>2.61%</b></span>
+    <span>结构 <b>底仓50% + 浮动50%金字塔</b></span>
+    <span class="stop">止损 <b>0.880</b>(破下沿-5%清仓)</span>
+    <span class="brk">突破 <b>1.130</b>(停浮动仓, 底仓续持)</span>
+  </div>
+  <div class="entry eok">✅ 低位箱体+价格在下部, 可开仓</div>
+  <div class="bline">📊 250日回测(滚动箱体+金字塔+底仓): 网格 <b><span style="color:#3fb950">-36.48%</span></b> (年化-36.48%, 最大回撤68.0%, 卡玛-0.54) vs 死拿 <span style="color:#3fb950">-47.55%</span> · 套利76次 · <b style="color:#f85149">止损4次</b>/<b style="color:#3fb950">突破6次</b></div>
+  <table class="gt"><tr><th>格</th><th>买价</th><th></th><th>卖价</th><th>到买价买</th><th>到卖价卖</th></tr>
+  <tr><td>第1格</td><td>0.926</td><td>→</td><td>0.950</td><td>买4.5份</td><td>卖4.5份</td></tr>
+<tr><td>第2格</td><td>0.950</td><td>→</td><td>0.974</td><td>买4.0份</td><td>卖4.0份</td></tr>
+<tr><td>第3格</td><td>0.974</td><td>→</td><td>0.998</td><td>买3.5份</td><td>卖3.5份</td></tr>
+<tr class="cur"><td>第4格</td><td>0.998</td><td>→</td><td>1.022</td><td>买3.0份</td><td>卖3.0份</td></tr>
+<tr><td>第5格</td><td>1.022</td><td>→</td><td>1.047</td><td>买2.5份</td><td>卖2.5份</td></tr>
+<tr><td>第6格</td><td>1.047</td><td>→</td><td>1.071</td><td>买2.0份</td><td>卖2.0份</td></tr>
+<tr><td>第7格</td><td>1.071</td><td>→</td><td>1.095</td><td>买1.5份</td><td>卖1.5份</td></tr>
+<tr><td>第8格</td><td>1.095</td><td>→</td><td>1.119</td><td>买1.0份</td><td>卖1.0份</td></tr>
+</table>
+  <div class="gnote">当前处于 <b>中部(持有)</b>(第4格)。底仓50%长线不动; 浮动仓: 跌穿买价按份额买、涨破卖价按份额卖, 越深的格买得越多。</div>
+</div>
+
+<div class="gcard">
+  <div class="ghead">白酒 <span class="code">sh512690</span> <span class="st range">震荡市</span>
+    <span class="gp">现价 0.412 · 5日 <span style="color:#3fb950">-4.85%</span> · 中部(持有) · 120日分位 17%</span></div>
+  <div class="gmeta">
+    <span>区间 <b>0.378 ~ 0.455</b></span>
+    <span>分 <b>8</b> 格 · 每格约 <b>2.55%</b></span>
+    <span>结构 <b>底仓50% + 浮动50%金字塔</b></span>
+    <span class="stop">止损 <b>0.359</b>(破下沿-5%清仓)</span>
+    <span class="brk">突破 <b>0.460</b>(停浮动仓, 底仓续持)</span>
+  </div>
+  <div class="entry eok">✅ 低位箱体+价格在下部, 可开仓</div>
+  <div class="bline">📊 250日回测(滚动箱体+金字塔+底仓): 网格 <b><span style="color:#3fb950">-35.95%</span></b> (年化-35.95%, 最大回撤43.3%, 卡玛-0.83) vs 死拿 <span style="color:#3fb950">-32.57%</span> · 套利27次 · <b style="color:#f85149">止损3次</b></div>
+  <table class="gt"><tr><th>格</th><th>买价</th><th></th><th>卖价</th><th>到买价买</th><th>到卖价卖</th></tr>
+  <tr><td>第1格</td><td>0.378</td><td>→</td><td>0.388</td><td>买4.5份</td><td>卖4.5份</td></tr>
+<tr><td>第2格</td><td>0.388</td><td>→</td><td>0.397</td><td>买4.0份</td><td>卖4.0份</td></tr>
+<tr><td>第3格</td><td>0.397</td><td>→</td><td>0.407</td><td>买3.5份</td><td>卖3.5份</td></tr>
+<tr class="cur"><td>第4格</td><td>0.407</td><td>→</td><td>0.416</td><td>买3.0份</td><td>卖3.0份</td></tr>
+<tr><td>第5格</td><td>0.416</td><td>→</td><td>0.426</td><td>买2.5份</td><td>卖2.5份</td></tr>
+<tr><td>第6格</td><td>0.426</td><td>→</td><td>0.436</td><td>买2.0份</td><td>卖2.0份</td></tr>
+<tr><td>第7格</td><td>0.436</td><td>→</td><td>0.445</td><td>买1.5份</td><td>卖1.5份</td></tr>
+<tr><td>第8格</td><td>0.445</td><td>→</td><td>0.455</td><td>买1.0份</td><td>卖1.0份</td></tr>
+</table>
+  <div class="gnote">当前处于 <b>中部(持有)</b>(第4格)。底仓50%长线不动; 浮动仓: 跌穿买价按份额买、涨破卖价按份额卖, 越深的格买得越多。</div>
+</div>
+
+<div class="gcard">
+  <div class="ghead">黄金ETF <span class="code">sh518880</span> <span class="st range">震荡市</span>
+    <span class="gp">现价 8.875 · 5日 <span style="color:#3fb950">-1.65%</span> · 中部(持有) · 120日分位 32%</span></div>
+  <div class="gmeta">
+    <span>区间 <b>8.224 ~ 9.620</b></span>
+    <span>分 <b>7</b> 格 · 每格约 <b>2.42%</b></span>
+    <span>结构 <b>底仓50% + 浮动50%金字塔</b></span>
+    <span class="stop">止损 <b>7.813</b>(破下沿-5%清仓)</span>
+    <span class="brk">突破 <b>9.716</b>(停浮动仓, 底仓续持)</span>
+  </div>
+  <div class="entry eok">✅ 低位箱体+价格在下部, 可开仓</div>
+  <div class="bline">📊 250日回测(滚动箱体+金字塔+底仓): 网格 <b><span style="color:#f85149">+1.02%</span></b> (年化+1.02%, 最大回撤28.6%, 卡玛0.04) vs 死拿 <span style="color:#f85149">+14.25%</span> · 套利58次 · <b style="color:#f85149">止损2次</b>/<b style="color:#3fb950">突破3次</b></div>
+  <table class="gt"><tr><th>格</th><th>买价</th><th></th><th>卖价</th><th>到买价买</th><th>到卖价卖</th></tr>
+  <tr><td>第1格</td><td>8.224</td><td>→</td><td>8.423</td><td>买4.0份</td><td>卖4.0份</td></tr>
+<tr><td>第2格</td><td>8.423</td><td>→</td><td>8.623</td><td>买3.5份</td><td>卖3.5份</td></tr>
+<tr><td>第3格</td><td>8.623</td><td>→</td><td>8.822</td><td>买3.0份</td><td>卖3.0份</td></tr>
+<tr class="cur"><td>第4格</td><td>8.822</td><td>→</td><td>9.022</td><td>买2.5份</td><td>卖2.5份</td></tr>
+<tr><td>第5格</td><td>9.022</td><td>→</td><td>9.221</td><td>买2.0份</td><td>卖2.0份</td></tr>
+<tr><td>第6格</td><td>9.221</td><td>→</td><td>9.421</td><td>买1.5份</td><td>卖1.5份</td></tr>
+<tr><td>第7格</td><td>9.421</td><td>→</td><td>9.620</td><td>买1.0份</td><td>卖1.0份</td></tr>
+</table>
+  <div class="gnote">当前处于 <b>中部(持有)</b>(第4格)。底仓50%长线不动; 浮动仓: 跌穿买价按份额买、涨破卖价按份额卖, 越深的格买得越多。</div>
+</div>
+
+<div class="gcard">
+  <div class="ghead">中证500 <span class="code">sh510500</span> <span class="st range">震荡市</span>
+    <span class="gp">现价 7.598 · 5日 <span style="color:#3fb950">-2.23%</span> · 下部(可买区) · 120日分位 8%</span></div>
+  <div class="gmeta">
+    <span>区间 <b>7.464 ~ 8.223</b></span>
+    <span>分 <b>5</b> 格 · 每格约 <b>2.03%</b></span>
+    <span>结构 <b>底仓50% + 浮动50%金字塔</b></span>
+    <span class="stop">止损 <b>7.091</b>(破下沿-5%清仓)</span>
+    <span class="brk">突破 <b>8.305</b>(停浮动仓, 底仓续持)</span>
+  </div>
+  <div class="entry eok">✅ 低位箱体+价格在下部, 可开仓</div>
+  <div class="bline">📊 250日回测(滚动箱体+金字塔+底仓): 网格 <b><span style="color:#f85149">+15.69%</span></b> (年化+15.69%, 最大回撤15.7%, 卡玛1.00) vs 死拿 <span style="color:#f85149">+9.48%</span> · 套利73次 · <b style="color:#f85149">止损1次</b>/<b style="color:#3fb950">突破4次</b></div>
+  <table class="gt"><tr><th>格</th><th>买价</th><th></th><th>卖价</th><th>到买价买</th><th>到卖价卖</th></tr>
+  <tr class="cur"><td>第1格</td><td>7.464</td><td>→</td><td>7.616</td><td>买3.0份</td><td>卖3.0份</td></tr>
+<tr><td>第2格</td><td>7.616</td><td>→</td><td>7.768</td><td>买2.5份</td><td>卖2.5份</td></tr>
+<tr><td>第3格</td><td>7.768</td><td>→</td><td>7.919</td><td>买2.0份</td><td>卖2.0份</td></tr>
+<tr><td>第4格</td><td>7.919</td><td>→</td><td>8.071</td><td>买1.5份</td><td>卖1.5份</td></tr>
+<tr><td>第5格</td><td>8.071</td><td>→</td><td>8.223</td><td>买1.0份</td><td>卖1.0份</td></tr>
+</table>
+  <div class="gnote">当前处于 <b>下部(可买区)</b>(第1格)。底仓50%长线不动; 浮动仓: 跌穿买价按份额买、涨破卖价按份额卖, 越深的格买得越多。</div>
+</div>
+<div class="foot">网格交易看板 · 每个交易日收盘后更新 · 判断仅供参考, 不构成投资建议</div>
+</body></html>
