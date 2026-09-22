@@ -2,6 +2,7 @@ name: 每日更新ETF看板
 on:
   schedule:
     - cron: '20 7 * * *'   # UTC 07:20 = 北京时间 15:20 收盘后, 每天
+    - cron: '0 23 * * *'  # 早场 UTC 23:00 = 北京7:00名义, 实际约8:40-9:30 早场
   workflow_dispatch:
 permissions:
   contents: write
