@@ -1,13 +1,5 @@
 [
   {
-    "time": "2026-10-28 09:23",
-    "holds": "消费ETF(37.0)",
-    "total": 48,
-    "pass": 6,
-    "market": "弱势",
-    "weight": 20
-  },
-  {
     "time": "2026-10-28 10:04",
     "holds": "消费ETF(37.0)",
     "total": 48,
@@ -236,6 +228,14 @@
     "holds": "汽车ETF(38.0)",
     "total": 48,
     "pass": 13,
+    "market": "弱势",
+    "weight": 20
+  },
+  {
+    "time": "2026-11-04 23:29",
+    "holds": "软件ETF(38.8)",
+    "total": 48,
+    "pass": 14,
     "market": "弱势",
     "weight": 20
   }
