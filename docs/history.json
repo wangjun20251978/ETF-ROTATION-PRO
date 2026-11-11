@@ -1,13 +1,5 @@
 [
   {
-    "time": "2026-11-04 10:21",
-    "holds": "汽车ETF(38.0)",
-    "total": 48,
-    "pass": 13,
-    "market": "弱势",
-    "weight": 20
-  },
-  {
     "time": "2026-11-04 10:56",
     "holds": "汽车ETF(38.0)",
     "total": 48,
@@ -236,6 +228,14 @@
     "holds": "德国ETF(43.6)",
     "total": 48,
     "pass": 17,
+    "market": "弱势",
+    "weight": 20
+  },
+  {
+    "time": "2026-11-11 10:37",
+    "holds": "德国ETF(43.6)",
+    "total": 39,
+    "pass": 16,
     "market": "弱势",
     "weight": 20
   }
